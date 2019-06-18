@@ -1,0 +1,11 @@
+{
+  "name": "InSeek-Backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Jake <git@ja-ke.tech>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mosca": "^2.8.3"
+  }
+}
