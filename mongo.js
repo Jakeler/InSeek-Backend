@@ -1,12 +1,25 @@
 const MongoClient = require('mongodb').MongoClient;
+const Db = require('mongodb').Db;
+
 const assert = require('assert');
 // Connection URL
 const mongoUrl = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'inseek';
 
+/**
+ * @type {MongoClient}
+ */
 let globalClient;
+/**
+ * @type {Db}
+ */
+let globalDb;
 
+/**
+ * Open a new connection
+ * @returns {MongoClient}
+ */
 const connect = () => new Promise((resolve, reject) => {
   MongoClient.connect(mongoUrl, (err, client) => {
     if (err != null) {
@@ -14,24 +27,32 @@ const connect = () => new Promise((resolve, reject) => {
     } else {
       console.log("Connected successfully to mongo server");
       globalClient = client;
+      globalDb = client.db(dbName);
       resolve(client);
     }
   });
 });
 
-
+/**
+ * Initialize DB with some example data
+ */
 const setupDB = async () => {
-  const client = await connect();  
-  const db = client.db(dbName);
+  await connect();
+  globalDb.dropDatabase();
 
-  const id = await addSuitcase(db);
-  await addCups(db, id);
+  const id = await addSuitcase(globalDb);
+  await addCups(globalDb, id);
 
+  await addImages(globalDb, 'ficker', ['abcd', 'defg', 'foo', 'bar']);
   
-  client.close();  
+  globalClient.close();  
 }
 
-
+/**
+ * Insert example cups
+ * @param {Db} db 
+ * @param {String} suitcaseID 
+ */
 const addCups = (db, suitcaseID) => new Promise((resolve, reject) => {
   db.collection('cup').insertMany([
     {
@@ -51,6 +72,10 @@ const addCups = (db, suitcaseID) => new Promise((resolve, reject) => {
   });
 });
 
+/**
+ * Insert example suitcase
+ * @param {Db} db 
+ */
 const addSuitcase = (db) => new Promise((resolve, reject) => {
   db.collection('suitcase').insertOne({
     state: 'perfect',
@@ -62,19 +87,25 @@ const addSuitcase = (db) => new Promise((resolve, reject) => {
   });
 });
 
-const addImages = (cupIDs, imagePaths) => new Promise((resolve, reject) => {
-  db.collection('image').insertMany([
-    {
+/**
+ * Insert image metadata after download
+ * @param {string} cupID
+ * @param {string[]} imagePaths 
+ */
+const addImages = (db, cupID, imagePaths) => new Promise((resolve, reject) => {
+  const data = imagePaths.map(path => ({
       timestamp: Date.now(),
       suchgangID: 'xyz',
-      cupId:cupIDs,
-      imagePath: imagePaths,
+      cupID:cupID,
+      imagePath: path,
       determinedInsectID: null, //reviewed insect ids?
       predictedInsectIDs: [],
     }
-    
-  ], (err, result) => {
+  ))
+
+  db.collection('image').insertMany(data, (err, result) => {
     if (err) reject(reject);
+    console.log(`Added ${imagePaths.length} images from "${cupID}"`);
     resolve();
   });
 })
