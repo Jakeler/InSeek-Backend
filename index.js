@@ -28,11 +28,20 @@ function setup() {
 
 
 
+const connectMongo = () => new Promise((resolve, reject) => {
+  MongoClient.connect(mongoUrl, (err, client) => {
+    if (err != null) {
+      reject(err);
+    } else {
+      console.log("Connected successfully to mongo server");
+      resolve(client);
+    }
+  });
+});
 
-// Use connect method to connect to the server
-MongoClient.connect(mongoUrl, function(err, client) {
-  assert.equal(null, err);
-  console.log("Connected successfully to mongo server");
+
+const setupMongo = async () => {
+  const client = await connectMongo();
   
   const db = client.db(dbName);
   let collection = db.collection('Meins');
@@ -40,17 +49,18 @@ MongoClient.connect(mongoUrl, function(err, client) {
   collection.insertOne({ich: 'nicht geilo', du: 'geilo'});
   collection.find({}).toArray((err, docs) => {
     console.log(docs);
+    client.close();
   })
   
-  client.close();
-});
+}
 
+setupMongo()
 
 const downloader = require('./download')
 
 let ipList = ["10.42.0.166"];
 
-downloader.syncAll(ipList);
+// downloader.syncAll(ipList);
 
 
 const intervalId = setInterval(async () => {
