@@ -58,15 +58,15 @@ const downloadAll = async (ip, imgCount) => {
   console.log(files);
 }
 
-let ip = "10.42.0.166";
-let maxImgId = 3;
-
-const syncAll = async () => {
+const sync = async (ip) => {
   const countBuffer = await checkStorage(ip);
   const count = parseInt(countBuffer);
+  if (count === 0) {
+    console.log('Nothing to sync');
+    return;
+  }
   console.log('Not synced images', count);
-  if (count === 0) return;
-
+  
   try {
     await downloadAll(ip, count);
     console.log('Downloaded all');
@@ -77,6 +77,12 @@ const syncAll = async () => {
   }
 }
 
-syncAll();
+const syncAll = async (ipList) => {
+  console.log('Started sync');
+  for (const ip of ipList) {
+    await sync(ip);
+    console.log('Synced cup at', ip);
+  }
+}
 
-// downloadAll(ip, maxImgId);
+module.exports = {syncAll}; 
