@@ -26,8 +26,19 @@ new Promise((resolve, reject) => {
     } else {
       response.on('data', chunk => resolve(chunk));
     }
-  })
-})
+  }).on('error', reject);
+});
+
+const wipeStorage = (ip) => 
+new Promise((resolve, reject) => {
+  http.get(`http://${ip}/storage/wipe`, response => {
+    if(response.statusCode !== 200) {
+      reject(`${response.statusCode} ${response.statusMessage}`);
+    } else {
+      response.on('data', chunk => resolve(chunk));
+    }
+  }).on('error', reject);
+});
 
 const downloadAll = async (ip, imgCount) => {
   const files = [];
@@ -38,13 +49,10 @@ const downloadAll = async (ip, imgCount) => {
     let fileId = (Math.floor(Math.random()*0xFFFFFFFF)).toString(16);
     let path = `images/${fileId}.jpg`;
   
-    try {
-      await download(url, path);
-      files.push(path);
-      console.log("DONE", index);
-    } catch(err) {
-      console.error('FAIL', err);
-    }
+    await download(url, path);
+    files.push(path);
+    console.log("DONE", index);
+      
   }
 
   console.log(files);
@@ -53,4 +61,22 @@ const downloadAll = async (ip, imgCount) => {
 let ip = "10.42.0.166";
 let maxImgId = 3;
 
-downloadAll(ip, maxImgId);
+const syncAll = async () => {
+  const countBuffer = await checkStorage(ip);
+  const count = parseInt(countBuffer);
+  console.log('Not synced images', count);
+  if (count === 0) return;
+
+  try {
+    await downloadAll(ip, count);
+    console.log('Downloaded all');
+    await wipeStorage(ip);
+    console.log('Storage clear');
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+syncAll();
+
+// downloadAll(ip, maxImgId);
