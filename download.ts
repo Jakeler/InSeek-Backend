@@ -2,7 +2,7 @@ const fs = require("fs");
 const http = require("http");
 
 
-const download = (url, path) => 
+const download = (url: string, path: string) => 
 new Promise((resolve, reject) => {
   console.log('Downloading from', url, 'to', path);
   
@@ -18,30 +18,30 @@ new Promise((resolve, reject) => {
   });
 });
 
-const checkStorage = (ip) => 
-new Promise((resolve, reject) => {
+const checkStorage = (ip: string) => 
+new Promise<Buffer>((resolve, reject) => {
   http.get(`http://${ip}/storage/img_count`, response => {
     if(response.statusCode !== 200) {
       reject(`${response.statusCode} ${response.statusMessage}`);
     } else {
-      response.on('data', chunk => resolve(chunk));
+      response.on('data', (chunk: Buffer) => resolve(chunk));
     }
   }).on('error', reject);
 });
 
-const wipeStorage = (ip) => 
-new Promise((resolve, reject) => {
+const wipeStorage = (ip: string) => 
+new Promise<Buffer>((resolve, reject) => {
   http.get(`http://${ip}/storage/wipe`, response => {
     if(response.statusCode !== 200) {
       reject(`${response.statusCode} ${response.statusMessage}`);
     } else {
-      response.on('data', chunk => resolve(chunk));
+      response.on('data', (chunk: Buffer) => resolve(chunk));
     }
   }).on('error', reject);
 });
 
-const downloadAll = async (ip, imgCount) => {
-  const files = [];
+const downloadAll = async (ip: string, imgCount: number): Promise<string[]> => {
+  const files: string[] = [];
 
   for (let index = 0; index < imgCount; index++) {
     let imgId = index;
@@ -54,13 +54,13 @@ const downloadAll = async (ip, imgCount) => {
     console.log("DONE", index);
       
   }
-
   console.log(files);
+  return files;
 }
 
 const sync = async (ip) => {
   const countBuffer = await checkStorage(ip);
-  const count = parseInt(countBuffer);
+  const count = parseInt(countBuffer.toString());
   if (count === 0) {
     console.log('Nothing to sync');
     return;

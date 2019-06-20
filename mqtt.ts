@@ -1,7 +1,9 @@
-const mosca = require('mosca');
+import {Server} from 'mosca'
 
-function init() {
-    const server = new mosca.Server({port: 2222});
+export function init() {
+    const server: Server = new Server({port: 2222}, () => {
+        console.log('Mosca MQTT server is up and running');
+    });
 
     server.on('clientConnected', (client) => {
         console.log('client connected', client.id);
@@ -11,10 +13,4 @@ function init() {
     server.on('published', (packet, client) => {
     console.log('Published', packet.payload);
     });
-
-    server.on('ready', () => {
-        console.log('Mosca MQTT server is up and running');
-    });
 }
-
-module.exports = {init}

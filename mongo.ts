@@ -1,5 +1,4 @@
-const MongoClient = require('mongodb').MongoClient;
-const Db = require('mongodb').Db;
+import { MongoClient, Db } from "mongodb";
 
 const assert = require('assert');
 // Connection URL
@@ -7,20 +6,14 @@ const mongoUrl = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'inseek';
 
-/**
- * @type {MongoClient}
- */
-let globalClient;
-/**
- * @type {Db}
- */
-let globalDb;
+let globalClient: MongoClient;
+let globalDb: Db;
 
 /**
  * Open a new connection
  * @returns {MongoClient}
  */
-const connect = () => new Promise((resolve, reject) => {
+export const connect = () => new Promise((resolve, reject) => {
   MongoClient.connect(mongoUrl, (err, client) => {
     if (err != null) {
       reject(err);
@@ -36,7 +29,7 @@ const connect = () => new Promise((resolve, reject) => {
 /**
  * Initialize DB with some example data
  */
-const setupDB = async () => {
+export const setupDB = async () => {
   await connect();
   globalDb.dropDatabase();
 
@@ -92,7 +85,7 @@ const addSuitcase = (db) => new Promise((resolve, reject) => {
  * @param {string} cupID
  * @param {string[]} imagePaths 
  */
-const addImages = (db, cupID, imagePaths) => new Promise((resolve, reject) => {
+export const addImages = (db, cupID, imagePaths) => new Promise((resolve, reject) => {
   const data = imagePaths.map(path => ({
       timestamp: Date.now(),
       suchgangID: 'xyz',
@@ -110,6 +103,3 @@ const addImages = (db, cupID, imagePaths) => new Promise((resolve, reject) => {
   });
 })
 
-
-
-module.exports = {connect, setupDB}
