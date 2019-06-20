@@ -58,31 +58,48 @@ const downloadAll = async (ip: string, imgCount: number): Promise<string[]> => {
   return files;
 }
 
-const sync = async (ip: string) => {
+const sync = async (ip: string): Promise<string[]> => {
   const countBuffer = await checkStorage(ip);
   const count = parseInt(countBuffer.toString());
   if (count === 0) {
     console.log('Nothing to sync');
     return;
   }
-  console.log('Not synced images', count);
+  console.log('Available images =', count);
   
-  try {
-    await downloadAll(ip, count);
-    console.log('Downloaded all');
-    await wipeStorage(ip);
-    console.log('Storage clear');
-  } catch (error) {
-    console.error(error);
-  }
+  const filePaths = await downloadAll(ip, count);
+  console.log('Downloaded all');
+  await wipeStorage(ip);
+  console.log('Storage clear');
+  return filePaths;
 }
 
-const syncAll = async (ipList: string[]) => {
+export interface cupIP {
+  _id: string,
+  ip: string,
+}
+
+interface cupImages {
+  _id: string,
+  filePaths: string[],
+}
+
+const syncAll = async (cupIPs: cupIP[]): Promise<cupImages[]> => {
   console.log('Started sync');
-  for (const ip of ipList) {
-    await sync(ip);
-    console.log('Synced cup at', ip);
+
+  const result: cupImages[] = [];
+  for (const cup of cupIPs) {
+    try {
+      result.push({
+        _id: cup._id,
+        filePaths: await sync(cup.ip),
+      });
+      console.log('Synced cup at', cup);
+    } catch (error) {
+      console.error('Unable to sync', cup);
+    }
   }
+  return result;
 }
 
 export {syncAll}; 

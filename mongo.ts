@@ -27,13 +27,12 @@ export const connect = () => new Promise<MongoClient>((resolve, reject) => {
  * Initialize DB with some example data
  */
 export const setupDB = async () => {
-  await connect();
   globalDb.dropDatabase();
 
   const id = await addSuitcase(globalDb);
   await addCups(globalDb, id);
 
-  await addImages(globalDb, 'ficker', ['abcd', 'defg', 'foo', 'bar']);
+  await addImages('ficker', ['abcd', 'defg', 'foo', 'bar']);
   
   globalClient.close();  
 }
@@ -74,10 +73,13 @@ const addSuitcase = (db: Db) => new Promise<string>((resolve, reject) => {
   });
 });
 
+export const getCupIpList = 
+  () => globalDb.collection('cup').find({}, {projection: {ip: true}}).toArray();
+
 /**
  * Insert image metadata after download
  */
-export const addImages = (db: Db, cupID: string, imagePaths: string[]) => new Promise((resolve, reject) => {
+export const addImages = (cupID: string, imagePaths: string[]) => new Promise((resolve, reject) => {
   const data = imagePaths.map(path => ({
       timestamp: Date.now(),
       suchgangID: 'xyz',
@@ -88,7 +90,7 @@ export const addImages = (db: Db, cupID: string, imagePaths: string[]) => new Pr
     }
   ))
 
-  db.collection('image').insertMany(data, (err, result) => {
+  globalDb.collection('image').insertMany(data, (err, result) => {
     if (err) reject(reject);
     console.log(`Added ${imagePaths.length} images from "${cupID}"`);
     resolve();
