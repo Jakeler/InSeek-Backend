@@ -35,8 +35,6 @@ export const setupDB = async () => {
   await addCups(globalDb, id);
 
   // await addImages({_id: 'asdfghjkl', filePaths: ['abcd', 'defg', 'foo', 'bar']});
-  
-  globalClient.close();  
 }
 
 /**

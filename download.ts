@@ -63,7 +63,7 @@ const sync = async (ip: string): Promise<string[]> => {
   const count = parseInt(countBuffer.toString());
   if (count === 0) {
     console.log('Nothing to sync');
-    return;
+    return [];
   }
   console.log('Available images =', count);
   
@@ -90,10 +90,12 @@ const syncAll = async (cupIPs: cupIP[]): Promise<cupImages[]> => {
   const result: cupImages[] = [];
   for (const cup of cupIPs) {
     try {
-      result.push({
-        _id: cup._id,
-        filePaths: await sync(cup.ip),
-      });
+      const paths = await sync(cup.ip);
+      if (paths.length > 0)
+        result.push({
+          _id: cup._id,
+          filePaths: paths,
+        });
       console.log('Synced cup at', cup);
     } catch (error) {
       console.error('Unable to sync', cup);
