@@ -58,7 +58,7 @@ const downloadAll = async (ip: string, imgCount: number): Promise<string[]> => {
   return files;
 }
 
-const sync = async (ip) => {
+const sync = async (ip: string) => {
   const countBuffer = await checkStorage(ip);
   const count = parseInt(countBuffer.toString());
   if (count === 0) {
@@ -77,7 +77,7 @@ const sync = async (ip) => {
   }
 }
 
-const syncAll = async (ipList) => {
+const syncAll = async (ipList: string[]) => {
   console.log('Started sync');
   for (const ip of ipList) {
     await sync(ip);
@@ -85,4 +85,4 @@ const syncAll = async (ipList) => {
   }
 }
 
-module.exports = {syncAll}; 
+export {syncAll}; 

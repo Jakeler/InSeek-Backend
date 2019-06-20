@@ -1,8 +1,6 @@
 import { MongoClient, Db } from "mongodb";
-
-const assert = require('assert');
 // Connection URL
-const mongoUrl = 'mongodb://localhost:27017';
+const mongoUrl = 'mongodb://t440s-arch:27017';
 // Database Name
 const dbName = 'inseek';
 
@@ -11,10 +9,9 @@ let globalDb: Db;
 
 /**
  * Open a new connection
- * @returns {MongoClient}
  */
-export const connect = () => new Promise((resolve, reject) => {
-  MongoClient.connect(mongoUrl, (err, client) => {
+export const connect = () => new Promise<MongoClient>((resolve, reject) => {
+  MongoClient.connect(mongoUrl, {useNewUrlParser: true},(err, client) => {
     if (err != null) {
       reject(err);
     } else {
@@ -43,10 +40,8 @@ export const setupDB = async () => {
 
 /**
  * Insert example cups
- * @param {Db} db 
- * @param {String} suitcaseID 
  */
-const addCups = (db, suitcaseID) => new Promise((resolve, reject) => {
+const addCups = (db: Db, suitcaseID: string) => new Promise((resolve, reject) => {
   db.collection('cup').insertMany([
     {
       suitcase: suitcaseID,
@@ -67,9 +62,8 @@ const addCups = (db, suitcaseID) => new Promise((resolve, reject) => {
 
 /**
  * Insert example suitcase
- * @param {Db} db 
  */
-const addSuitcase = (db) => new Promise((resolve, reject) => {
+const addSuitcase = (db: Db) => new Promise<string>((resolve, reject) => {
   db.collection('suitcase').insertOne({
     state: 'perfect',
     distributedTo: 'HfG',
@@ -82,10 +76,8 @@ const addSuitcase = (db) => new Promise((resolve, reject) => {
 
 /**
  * Insert image metadata after download
- * @param {string} cupID
- * @param {string[]} imagePaths 
  */
-export const addImages = (db, cupID, imagePaths) => new Promise((resolve, reject) => {
+export const addImages = (db: Db, cupID: string, imagePaths: string[]) => new Promise((resolve, reject) => {
   const data = imagePaths.map(path => ({
       timestamp: Date.now(),
       suchgangID: 'xyz',
