@@ -79,7 +79,7 @@ export interface cupIP {
   ip: string,
 }
 
-interface cupImages {
+export interface cupImages {
   _id: string,
   filePaths: string[],
 }

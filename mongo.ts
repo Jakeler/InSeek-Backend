@@ -1,4 +1,6 @@
 import { MongoClient, Db } from "mongodb";
+import { cupImages } from './download';
+
 // Connection URL
 const mongoUrl = 'mongodb://t440s-arch:27017';
 // Database Name
@@ -32,7 +34,7 @@ export const setupDB = async () => {
   const id = await addSuitcase(globalDb);
   await addCups(globalDb, id);
 
-  await addImages('ficker', ['abcd', 'defg', 'foo', 'bar']);
+  // await addImages({_id: 'asdfghjkl', filePaths: ['abcd', 'defg', 'foo', 'bar']});
   
   globalClient.close();  
 }
@@ -44,17 +46,16 @@ const addCups = (db: Db, suitcaseID: string) => new Promise((resolve, reject) =>
   db.collection('cup').insertMany([
     {
       suitcase: suitcaseID,
-      ip: '10.0.0.10',
+      ip: '10.42.0.166',
       friendlyName: 'Die lustige Libelle Lotta',
     }, {
       suitcase: suitcaseID,
-      ip: '10.0.0.11',
+      ip: '10.0.0.36',
       friendlyName: 'Die lustige Libelle Lotta 2',
     },
   ], (err, result) => {
     if (err) reject(reject);
-    const ids = result.ops.map(obj => obj._id);
-    resolve(ids);
+    resolve();
     console.log('Cups included');
   });
 });
@@ -79,11 +80,11 @@ export const getCupIpList =
 /**
  * Insert image metadata after download
  */
-export const addImages = (cupID: string, imagePaths: string[]) => new Promise((resolve, reject) => {
-  const data = imagePaths.map(path => ({
+export const addImages = (cupImages: cupImages) => new Promise((resolve, reject) => {
+  const data = cupImages.filePaths.map(path => ({
       timestamp: Date.now(),
       suchgangID: 'xyz',
-      cupID:cupID,
+      cupID: cupImages._id,
       imagePath: path,
       determinedInsectID: null, //reviewed insect ids?
       predictedInsectIDs: [],
@@ -92,7 +93,7 @@ export const addImages = (cupID: string, imagePaths: string[]) => new Promise((r
 
   globalDb.collection('image').insertMany(data, (err, result) => {
     if (err) reject(reject);
-    console.log(`Added ${imagePaths.length} images from "${cupID}"`);
+    console.log(`Added ${cupImages.filePaths.length} images from "${cupImages._id}"`);
     resolve();
   });
 })
