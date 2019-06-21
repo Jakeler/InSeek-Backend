@@ -1,4 +1,4 @@
-import { MongoClient, Db } from "mongodb";
+import { MongoClient, Db, ObjectId } from "mongodb";
 import { cupImages } from './download';
 
 import { loggerGenerator, SubSystem } from './logger';
@@ -76,7 +76,9 @@ const addSuitcase = (db: Db) => new Promise<string>((resolve, reject) => {
 });
 
 export const getCupIpList = 
-  () => globalDb.collection('cup').find({}, {projection: {ip: true}}).toArray();
+  () => globalDb.collection('cup')
+    .find({}, {projection: {ip: true}})
+    .toArray();
 
 /**
  * Insert image metadata after download
@@ -99,3 +101,13 @@ export const addImages = (cupImages: cupImages) => new Promise((resolve, reject)
   });
 })
 
+
+export const getCups = (suitcase?: string) => 
+  globalDb.collection('cup')
+    .find(suitcase? {suitcase: new ObjectId(suitcase)} : {})
+    .toArray();
+
+export const getImg = (cup?: string) => 
+  globalDb.collection('image')
+    .find(cup? {cupID: new ObjectId(cup)} : {})
+    .toArray();
