@@ -1,10 +1,13 @@
 const fs = require("fs");
 const http = require("http");
 
+import { loggerGenerator, SubSystem } from './logger';
+const log = loggerGenerator(SubSystem.DL);
+
 
 const download = (url: string, path: string) => 
 new Promise((resolve, reject) => {
-  console.log('Downloading from', url, 'to', path);
+  log.info(`Downloading from ${url} to ${path}`);
   
   http.get(url, response => {
     if(response.statusCode !== 200) {
@@ -51,10 +54,10 @@ const downloadAll = async (ip: string, imgCount: number): Promise<string[]> => {
   
     await download(url, path);
     files.push(path);
-    console.log("DONE", index);
+    log.info("DONE " + index);
       
   }
-  console.log(files);
+  log.info(files);
   return files;
 }
 
@@ -62,15 +65,15 @@ const sync = async (ip: string): Promise<string[]> => {
   const countBuffer = await checkStorage(ip);
   const count = parseInt(countBuffer.toString());
   if (count === 0) {
-    console.log('Nothing to sync');
+    log.info('Nothing to download');
     return [];
   }
-  console.log('Available images =', count);
+  log.info('Available images = ' + count);
   
   const filePaths = await downloadAll(ip, count);
-  console.log('Downloaded all');
+  log.info('Downloaded all');
   await wipeStorage(ip);
-  console.log('Storage clear');
+  log.info('Storage clear');
   return filePaths;
 }
 
@@ -85,7 +88,7 @@ export interface cupImages {
 }
 
 const syncAll = async (cupIPs: cupIP[]): Promise<cupImages[]> => {
-  console.log('Started sync');
+  log.info('Started sync');
 
   const result: cupImages[] = [];
   for (const cup of cupIPs) {
@@ -96,9 +99,9 @@ const syncAll = async (cupIPs: cupIP[]): Promise<cupImages[]> => {
           _id: cup._id,
           filePaths: paths,
         });
-      console.log('Synced cup at', cup);
+      log.info(`Synced cup ${cup._id} from ${cup.ip}`);
     } catch (error) {
-      console.error('Unable to sync', cup);
+      log.err(`Unable to sync ${cup._id} from ${cup.ip}`);
     }
   }
   return result;

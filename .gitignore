@@ -1,6 +1,9 @@
 # Typescript generated
 dist/
 
+# Backend image dl
+images/ 
+
 # Logs
 logs
 *.log

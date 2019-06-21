@@ -1,6 +1,9 @@
 import { MongoClient, Db } from "mongodb";
 import { cupImages } from './download';
 
+import { loggerGenerator, SubSystem } from './logger';
+const log = loggerGenerator(SubSystem.MONGO);
+
 // Connection URL
 const mongoUrl = 'mongodb://t440s-arch:27017';
 // Database Name
@@ -17,7 +20,7 @@ export const connect = () => new Promise<MongoClient>((resolve, reject) => {
     if (err != null) {
       reject(err);
     } else {
-      console.log("Connected successfully to mongo server");
+      log.info("Connected successfully to mongo server");
       globalClient = client;
       globalDb = client.db(dbName);
       resolve(client);
@@ -54,7 +57,7 @@ const addCups = (db: Db, suitcaseID: string) => new Promise((resolve, reject) =>
   ], (err, result) => {
     if (err) reject(reject);
     resolve();
-    console.log('Cups included');
+    log.info('Cups included');
   });
 });
 
@@ -67,7 +70,7 @@ const addSuitcase = (db: Db) => new Promise<string>((resolve, reject) => {
     distributedTo: 'HfG',
   }, (err, result) => {
     if (err) reject(reject);
-    console.log('Suitcase included');
+    log.info('Suitcase included');
     resolve(result.ops[0]._id)
   });
 });
@@ -91,7 +94,7 @@ export const addImages = (cupImages: cupImages) => new Promise((resolve, reject)
 
   globalDb.collection('image').insertMany(data, (err, result) => {
     if (err) reject(reject);
-    console.log(`Added ${cupImages.filePaths.length} images from "${cupImages._id}"`);
+    log.info(`Added ${cupImages.filePaths.length} images from "${cupImages._id}"`);
     resolve();
   });
 })
