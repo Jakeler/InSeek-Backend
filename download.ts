@@ -101,7 +101,7 @@ const syncAll = async (cupIPs: cupIP[]): Promise<cupImages[]> => {
         });
       log.info(`Synced cup ${cup._id} from ${cup.ip}`);
     } catch (error) {
-      log.err(`Unable to sync ${cup._id} from ${cup.ip}`);
+      log.err(`Unable to sync ${cup._id}: ${error}`);
     }
   }
   return result;

@@ -12,7 +12,7 @@ async function start() { // Top level await
     // await mongo.setupDB(); //run this only once
     
     let cupIpList = await mongo.getCupIpList();
-    loggerGenerator(SubSystem.DL).info(cupIpList);
+    loggerGenerator(SubSystem.DL).info(`Existing cups: \n${JSON.stringify(cupIpList, null, 2)}`);
     
     
     const intervalId = setInterval(async () => {  // Block if previous run not done or something?
