@@ -1,6 +1,7 @@
 import * as mongo from './mongo';
 import * as mqtt from "./mqtt";
 import * as downloader from './download';
+import { loggerGenerator, SubSystem } from './logger';
 
 async function start() { // Top level await
     await mqtt.init();
@@ -9,7 +10,7 @@ async function start() { // Top level await
     // await mongo.setupDB(); //run this only once
     
     let cupIpList = await mongo.getCupIpList();
-    console.log(cupIpList)
+    loggerGenerator(SubSystem.DL).info(cupIpList);
     
     
     const intervalId = setInterval(async () => {  // Block if previous run not done or something?
