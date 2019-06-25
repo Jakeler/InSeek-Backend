@@ -20,7 +20,7 @@ async function start() { // Top level await
         for (const cup of cupImageList) {
             await mongo.addImages(cup);
         }
-    }, 10*1000);
+    }, 100*1000);
 
 }
 
