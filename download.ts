@@ -34,13 +34,14 @@ new Promise<Buffer>((resolve, reject) => {
   }).on('error', reject);
 });
 
-const wipeStorage = (ip: string) => 
+const deleteStorage = (ip: string, index: number) => 
 new Promise<Buffer>((resolve, reject) => {
-  http.get(`http://${ip}/storage/wipe`, response => {
+  http.get(`http://${ip}/storage/delete?id=${index}`, response => {
     if(response.statusCode !== 200) {
       reject(`${response.statusCode} ${response.statusMessage}`);
     } else {
       response.on('data', (chunk: Buffer) => resolve(chunk));
+      log.info(`Deleted image with index ${index}`);
     }
   }).on('error', reject);
 });
@@ -53,9 +54,9 @@ const sync = async (cup: cupIP): Promise<string[]> => {
     log.info('Nothing to download');
     return [];
   }
-  log.info('Available images = ' + count);
+  log.info(`${cup._id}: found ${count} available images`);
   
-  for (let index = 0; index < count; index++) {
+  for (let index = count-1; index >= 0; index--) {
     let imgId = index;
     let url = `http://${cup.ip}/storage/img?id=${imgId}`
     let fileId = (Math.floor(Math.random()*0xFFFFFFFF)).toString(16);
@@ -63,12 +64,8 @@ const sync = async (cup: cupIP): Promise<string[]> => {
   
     await download(url, path);
     await addImages(cup._id, path);
-    // delete
+    await deleteStorage(cup.ip, index);
   }
-  log.info('Downloaded all');
-
-  await wipeStorage(cup.ip);
-  log.info('Storage clear');
 }
 
 export interface cupIP {
@@ -78,16 +75,18 @@ export interface cupIP {
 
 
 const syncAll = async (cupIPs: cupIP[]): Promise<void> => {
-  log.info('Started sync');
+  log.info('Beginning sync...');
 
   for (const cup of cupIPs) {
     try {
       const paths = await sync(cup);
-      log.info(`Synced cup ${cup._id} from ${cup.ip}`);
+      log.info(`=> Synced cup ${cup._id} from ${cup.ip}`);
     } catch (error) {
-      log.err(`Unable to sync ${cup._id}: ${error}`);
+      log.err(`=> Unable to sync ${cup._id}: ${error}`);
     }
   }
+
+  log.info('Sync all complete!')
 }
 
 export {syncAll}; 
