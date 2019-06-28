@@ -16,11 +16,8 @@ async function start() { // Top level await
     
     
     const intervalId = setInterval(async () => {  // Block if previous run not done or something?
-        const cupImageList = await downloader.syncAll(cupIpList);
-        for (const cup of cupImageList) {
-            await mongo.addImages(cup);
-        }
-    }, 100*1000);
+        await downloader.syncAll(cupIpList);
+    }, 10*1000);
 
 }
 

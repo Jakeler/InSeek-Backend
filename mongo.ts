@@ -1,5 +1,4 @@
 import { MongoClient, Db, ObjectId } from "mongodb";
-import { cupImages } from './download';
 
 import { loggerGenerator, SubSystem } from './logger';
 const log = loggerGenerator(SubSystem.MONGO);
@@ -51,8 +50,8 @@ const addCups = (db: Db, suitcaseID: string) => new Promise((resolve, reject) =>
       friendlyName: 'Die lustige Libelle Lotta',
     }, {
       suitcase: suitcaseID,
-      ip: '10.0.0.36',
-      friendlyName: 'Die lustige Libelle Lotta 2',
+      ip: '127.0.0.1',
+      friendlyName: 'Die lokale Libelle Lotta',
     },
   ], (err, result) => {
     if (err) reject(reject);
@@ -83,20 +82,20 @@ export const getCupIpList =
 /**
  * Insert image metadata after download
  */
-export const addImages = (cupImages: cupImages) => new Promise((resolve, reject) => {
-  const data = cupImages.filePaths.map(path => ({
+export const addImages = (cupId: string, path: string) => new Promise((resolve, reject) => {
+  const data = {
       timestamp: Date.now(),
       suchgangID: 'xyz',
-      cupID: cupImages._id,
+      cupID: cupId,
       imagePath: path,
-      determinedInsectID: null, //reviewed insect ids?
+      determinedInsectID: null, //reviewed insect IDs
       predictedInsectIDs: [],
     }
-  ))
+  
 
-  globalDb.collection('image').insertMany(data, (err, result) => {
+  globalDb.collection('image').insertOne(data, (err, result) => {
     if (err) reject(reject);
-    log.info(`Added ${cupImages.filePaths.length} images from "${cupImages._id}"`);
+    log.info(`Added ${path} from "${cupId}"`);
     resolve();
   });
 })

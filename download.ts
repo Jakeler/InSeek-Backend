@@ -4,6 +4,8 @@ const http = require("http");
 import { loggerGenerator, SubSystem } from './logger';
 const log = loggerGenerator(SubSystem.DL);
 
+import { addImages } from "./mongo";
+
 
 const download = (url: string, path: string) => 
 new Promise((resolve, reject) => {
@@ -43,26 +45,9 @@ new Promise<Buffer>((resolve, reject) => {
   }).on('error', reject);
 });
 
-const downloadAll = async (ip: string, imgCount: number): Promise<string[]> => {
-  const files: string[] = [];
 
-  for (let index = 0; index < imgCount; index++) {
-    let imgId = index;
-    let url = `http://${ip}/storage/img?id=${imgId}`
-    let fileId = (Math.floor(Math.random()*0xFFFFFFFF)).toString(16);
-    let path = `images/${fileId}.jpg`;
-  
-    await download(url, path);
-    files.push(path);
-    log.info("DONE " + index);
-      
-  }
-  log.info(files);
-  return files;
-}
-
-const sync = async (ip: string): Promise<string[]> => {
-  const countBuffer = await checkStorage(ip);
+const sync = async (cup: cupIP): Promise<string[]> => {
+  const countBuffer = await checkStorage(cup.ip);
   const count = parseInt(countBuffer.toString());
   if (count === 0) {
     log.info('Nothing to download');
@@ -70,11 +55,20 @@ const sync = async (ip: string): Promise<string[]> => {
   }
   log.info('Available images = ' + count);
   
-  const filePaths = await downloadAll(ip, count);
+  for (let index = 0; index < count; index++) {
+    let imgId = index;
+    let url = `http://${cup.ip}/storage/img?id=${imgId}`
+    let fileId = (Math.floor(Math.random()*0xFFFFFFFF)).toString(16);
+    let path = `images/${fileId}.jpg`;
+  
+    await download(url, path);
+    await addImages(cup._id, path);
+    // delete
+  }
   log.info('Downloaded all');
-  await wipeStorage(ip);
+
+  await wipeStorage(cup.ip);
   log.info('Storage clear');
-  return filePaths;
 }
 
 export interface cupIP {
@@ -82,29 +76,18 @@ export interface cupIP {
   ip: string,
 }
 
-export interface cupImages {
-  _id: string,
-  filePaths: string[],
-}
 
-const syncAll = async (cupIPs: cupIP[]): Promise<cupImages[]> => {
+const syncAll = async (cupIPs: cupIP[]): Promise<void> => {
   log.info('Started sync');
 
-  const result: cupImages[] = [];
   for (const cup of cupIPs) {
     try {
-      const paths = await sync(cup.ip);
-      if (paths.length > 0)
-        result.push({
-          _id: cup._id,
-          filePaths: paths,
-        });
+      const paths = await sync(cup);
       log.info(`Synced cup ${cup._id} from ${cup.ip}`);
     } catch (error) {
       log.err(`Unable to sync ${cup._id}: ${error}`);
     }
   }
-  return result;
 }
 
 export {syncAll}; 
