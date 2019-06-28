@@ -13,12 +13,15 @@ async function start() { // Top level await
     
     let cupIpList = await mongo.getCupIpList();
     loggerGenerator(SubSystem.DL).info(`Existing cups: \n${JSON.stringify(cupIpList, null, 2)}`);
-    
-    
-    const intervalId = setInterval(async () => {  // Block if previous run not done or something?
-        await downloader.syncAll(cupIpList);
-    }, 10*1000);
 
+    while(true) {
+        await downloader.syncAll(cupIpList);
+        await awaiter(10*1000);
+    }
 }
+
+const awaiter = (ms: number) => new Promise((resolve, reject) => {
+    setTimeout(resolve, ms);
+})
 
 start();
