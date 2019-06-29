@@ -1,4 +1,5 @@
 import * as express from 'express';
+import * as cors from "cors";
 import {getSuitcases, getCups, getImg} from './mongo';
 import { loggerGenerator, SubSystem } from './logger';
 const log = loggerGenerator(SubSystem.API);
@@ -22,6 +23,8 @@ export function start() {
         log.info(`Received ${req.method} ${req.originalUrl}`)
         next();
     });
+
+    app.use(cors());
     
     /**
      * Get list of suitcases
