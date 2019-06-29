@@ -1,5 +1,5 @@
 import * as express from 'express';
-import {getCups, getImg} from './mongo';
+import {getSuitcases, getCups, getImg} from './mongo';
 import { loggerGenerator, SubSystem } from './logger';
 const log = loggerGenerator(SubSystem.API);
 
@@ -22,7 +22,16 @@ export function start() {
         log.info(`Received ${req.method} ${req.originalUrl}`)
         next();
     });
-        
+    
+    /**
+     * Get list of suitcases
+     */
+    app.get('/suitcase', catcher(async (req, res) => {
+        const data = await getSuitcases();
+        res.json(data[0]);
+    }));
+
+
     /**
      * Get list of cups, defaults to all without param, for specific suitcase use: /cup/list?suitcase=ID
     [

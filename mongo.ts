@@ -100,6 +100,10 @@ export const addImages = (cupId: string, path: string) => new Promise((resolve, 
   });
 })
 
+export const getSuitcases = () => 
+  globalDb.collection('suitcase')
+    .find({})
+    .toArray();
 
 export const getCups = (suitcase?: string) => 
   globalDb.collection('cup')
@@ -110,3 +114,6 @@ export const getImg = (cup?: string) =>
   globalDb.collection('image')
     .find(cup? {cupID: new ObjectId(cup)} : {})
     .toArray();
+
+
+  
