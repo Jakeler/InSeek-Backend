@@ -1,6 +1,6 @@
 import * as express from 'express';
 import * as cors from "cors";
-import {getSuitcases, getCups, getImg} from './mongo';
+import {getSuitcases, getCups, getImg, getImgCount} from './mongo';
 import { loggerGenerator, SubSystem } from './logger';
 const log = loggerGenerator(SubSystem.API);
 
@@ -53,7 +53,11 @@ export function start() {
     ]
      */
     app.get('/cup/list', catcher(async (req, res) => {
-        res.json(await getCups(req.query.suitcase));
+        const data = await getCups(req.query.suitcase);
+        for (const elm of data) {
+            elm["imageCount"] = await getImgCount(elm._id);
+        }
+        res.json(data);
     }));
     
     /**
