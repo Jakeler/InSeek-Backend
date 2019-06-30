@@ -36,7 +36,7 @@ export const setupDB = async () => {
   const id = await addSuitcase(globalDb);
   await addCups(globalDb, id);
 
-  await addImages('asdfghjkl', 'abcd');
+  await addImage('asdfghjkl', 'abcd');
 }
 
 /**
@@ -92,7 +92,7 @@ export const getCupIpList =
 /**
  * Insert image metadata after download
  */
-export const addImages = (cupId: string, path: string) => new Promise((resolve, reject) => {
+export const addImage = (cupId: string, path: string) => new Promise((resolve, reject) => {
   const data = {
       timestamp: Date.now(),
       suchgangID: 'xyz',
@@ -118,7 +118,7 @@ export const getCups = (suitcase?: string) =>
     .find(suitcase? {suitcase: new ObjectId(suitcase)} : {})
     .toArray();
 
-export const getImg = (cup?: string) => 
+export const getImages = (cup?: string) => 
   globalDb.collection('image')
     .find(cup? {cupID: new ObjectId(cup)} : {})
     .toArray();

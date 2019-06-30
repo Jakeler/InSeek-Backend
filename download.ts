@@ -7,7 +7,7 @@ const options: http.RequestOptions = {
 import { loggerGenerator, SubSystem } from './logger';
 const log = loggerGenerator(SubSystem.DL);
 
-import { addImages } from "./mongo";
+import { addImage } from "./mongo";
 
 
 const download = (url: string, path: string) => 
@@ -66,7 +66,7 @@ const sync = async (cup: cupIP): Promise<string[]> => {
     let path = `images/${fileId}.jpg`;
   
     await download(url, path);
-    await addImages(cup._id, path);
+    await addImage(cup._id, path);
     await deleteStorage(cup.ip, index);
   }
 }
