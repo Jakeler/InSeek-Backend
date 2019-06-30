@@ -36,7 +36,7 @@ export const setupDB = async () => {
   const id = await addSuitcase(globalDb);
   await addCups(globalDb, id);
 
-  // await addImages({_id: 'asdfghjkl', filePaths: ['abcd', 'defg', 'foo', 'bar']});
+  await addImages('asdfghjkl', 'abcd');
 }
 
 /**
@@ -122,10 +122,17 @@ export const getImg = (cup?: string) =>
   globalDb.collection('image')
     .find(cup? {cupID: new ObjectId(cup)} : {})
     .toArray();
-  
+
+export const confirmImg = (imageID: string, insectID: string) => 
+  globalDb.collection('image').updateOne(
+    {_id: new ObjectId(imageID)},
+    {$set: {determinedInsectID: insectID}});
+
+
 export const getImgCount = (cup?: string) => 
   globalDb.collection('image')
     .count(cup? {cupID: new ObjectId(cup)} : {})
+
 
 
   

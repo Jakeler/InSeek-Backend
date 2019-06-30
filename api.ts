@@ -1,6 +1,6 @@
 import * as express from 'express';
 import * as cors from "cors";
-import {getSuitcases, getCups, getImg, getImgCount} from './mongo';
+import {getSuitcases, getCups, getImg, getImgCount, confirmImg} from './mongo';
 import { loggerGenerator, SubSystem } from './logger';
 const log = loggerGenerator(SubSystem.API);
 
@@ -25,6 +25,8 @@ export function start() {
     });
 
     app.use(cors());
+
+    app.use(express.json()); // Parses JSON body for POST
     
     /**
      * Get list of suitcases
@@ -86,6 +88,24 @@ export function start() {
     app.get('/image/list', catcher(async (req, res) => {
         res.json(await getImg(req.query.cup));
     }));
+
+    /**
+     * Send a POST request to /image/IMAGE-ID/confirm 
+     * with {determinedInsectID: 'ID'} as json  body.
+     * IMAGE-ID must be the full database id (not the file/path id)
+     * Responds on success with:
+        {
+            "n": 1,
+            "nModified": 1,
+            "ok": 1
+        }
+     */
+    app.post('/image/:imageID/confirm', catcher(async (req, res) => {
+        const data = await confirmImg(req.params.imageID, req.body.determinedInsectID);
+        log.info(req.body);
+        res.json(data.result);
+    }));
+
     /**
      * Get saved images with id: /images/ID.jpg
      */
