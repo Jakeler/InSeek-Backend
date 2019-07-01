@@ -1,6 +1,6 @@
 import * as express from 'express';
 import * as cors from "cors";
-import {getSuitcases, getCups, getImages, getImgCount, confirmImg} from './mongo';
+import {getSuitcases, getCups, getImages, getImgCount, confirmImg, getInsects} from './mongo';
 import { loggerGenerator, SubSystem } from './logger';
 const log = loggerGenerator(SubSystem.API);
 
@@ -110,6 +110,23 @@ export function start() {
      * Get saved images with id: /images/ID.jpg
      */
     app.use('/images/', express.static('images/'));
+
+    /**
+     * Responds with insect info Array:
+        [
+            {
+                "_id": "5d1a921b43e2a123915c1356",
+                "name": "Asiatischer Marienkäfer",
+                "scientificName": "harmonia axyridis",
+                "imageUrl": "https://tse3.mm.bing.net/th?id=OIP.52yrurvf7kuZkNYnbu2B1AHaGW&pid=Api",
+                "extract": "Der Asiatische Marienkäfer ist ein Käfer aus der Familie der Marienkäfer (Coccinellidae)."
+            },
+            ...
+        ]
+     */
+    app.get('/insect/list', catcher(async (req, res) => {
+        res.json(await getInsects());
+    }))
 
     
     app.listen(3000, function () {

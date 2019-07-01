@@ -3,6 +3,8 @@ import { MongoClient, Db, ObjectId } from "mongodb";
 import { loggerGenerator, SubSystem } from './logger';
 const log = loggerGenerator(SubSystem.MONGO);
 
+import { insectMetadata, genCupList, suitcaseData } from "./exampleData";
+
 // Connection URL
 const mongoUrl = 'mongodb://t440s-arch:27017';
 // Database Name
@@ -37,30 +39,15 @@ export const setupDB = async () => {
   await addCups(globalDb, id);
 
   await addImage('asdfghjkl', 'abcd');
+
+  await addInsectData();
 }
 
 /**
  * Insert example cups
  */
 const addCups = (db: Db, suitcaseID: string) => new Promise((resolve, reject) => {
-  db.collection('cup').insertMany([
-    {
-      suitcase: suitcaseID,
-      ip: '10.42.0.166',
-      friendlyName: 'Die lustige Libelle Lotta',
-      syncStatus: "finished",
-    }, {
-      suitcase: suitcaseID,
-      ip: '127.0.0.1',
-      friendlyName: 'Die lokale Libelle Lotta',
-      syncStatus: "finished",
-    }, 
-    ...(Array.apply(null, {length: 10})).map(() => (
-      {
-        ip: "0.0.0.0",
-        syncStatus: "pending",
-      }))
-  ], (err, result) => {
+  db.collection('cup').insertMany(genCupList(suitcaseID), (err, result) => {
     if (err) reject(reject);
     resolve();
     log.info('Cups included');
@@ -71,42 +58,46 @@ const addCups = (db: Db, suitcaseID: string) => new Promise((resolve, reject) =>
  * Insert example suitcase
  */
 const addSuitcase = (db: Db) => new Promise<string>((resolve, reject) => {
-  db.collection('suitcase').insertOne({
-    state: 'perfect',
-    distributedTo: 'HfG',
-    location: "Taubental",
-    date: Date.now(),
-    allImagesSynced: true,
-  }, (err, result) => {
+  db.collection('suitcase').insertOne(suitcaseData, (err, result) => {
     if (err) reject(reject);
     log.info('Suitcase included');
     resolve(result.ops[0]._id)
   });
 });
 
-export const getCupIpList = 
-  () => globalDb.collection('cup')
-    .find({}, {projection: {ip: true}})
-    .toArray();
 
 /**
  * Insert image metadata after download
  */
 export const addImage = (cupId: string, path: string) => new Promise((resolve, reject) => {
   const data = {
-      timestamp: Date.now(),
-      suchgangID: 'xyz',
-      cupID: cupId,
-      imagePath: path,
-      determinedInsectID: null, //reviewed insect IDs
-      predictedInsectIDs: [],
-    }
+    timestamp: Date.now(),
+    suchgangID: 'xyz',
+    cupID: cupId,
+    imagePath: path,
+    determinedInsectID: null, //reviewed insect IDs
+    predictedInsectIDs: [],
+  }
   globalDb.collection('image').insertOne(data, (err, result) => {
     if (err) reject(reject);
     log.info(`Added ${path} from "${cupId}"`);
     resolve();
   });
 })
+
+const addInsectData = () => 
+  globalDb.collection('insects').insertMany(insectMetadata);
+
+
+export const getInsects = () =>
+  globalDb.collection('insects').find({})
+  .toArray()
+
+
+export const getCupIpList = () => 
+  globalDb.collection('cup')
+    .find({}, {projection: {ip: true}})
+    .toArray();
 
 export const getSuitcases = () => 
   globalDb.collection('suitcase')
