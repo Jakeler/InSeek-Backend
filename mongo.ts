@@ -6,7 +6,7 @@ const log = loggerGenerator(SubSystem.MONGO);
 import { insectMetadata, genCupList, suitcaseData } from "./exampleData";
 
 // Connection URL
-const mongoUrl = 'mongodb://t440s-arch:27017';
+const mongoUrl = 'mongodb://0.0.0.0:27017';
 // Database Name
 const dbName = 'inseek';
 
@@ -38,7 +38,7 @@ export const setupDB = async () => {
   const id = await addSuitcase(globalDb);
   await addCups(globalDb, id);
 
-  await addImage('asdfghjkl', 'abcd');
+  // await addImage('asdfghjkl', 'abcd', []);
 
   await addInsectData();
 }
