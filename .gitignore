@@ -4,6 +4,8 @@ dist/
 # Backend image dl
 images/ 
 
+ki/mobileNet
+
 # Logs
 logs
 *.log

@@ -8,6 +8,7 @@ import { loggerGenerator, SubSystem } from './logger';
 const log = loggerGenerator(SubSystem.DL);
 
 import { addImage } from "./mongo";
+import * as ki from './ki';
 
 
 const download = (url: string, path: string) => 
@@ -66,7 +67,9 @@ const sync = async (cup: cupIP): Promise<string[]> => {
     let path = `images/${fileId}.jpg`;
   
     await download(url, path);
-    await addImage(cup._id, path);
+    const pred = await ki.classify(path);
+    log.info('Determined insect = '+pred[0]);
+    await addImage(cup._id, path, pred);
     await deleteStorage(cup.ip, index);
   }
 }

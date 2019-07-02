@@ -69,14 +69,14 @@ const addSuitcase = (db: Db) => new Promise<string>((resolve, reject) => {
 /**
  * Insert image metadata after download
  */
-export const addImage = (cupId: string, path: string) => new Promise((resolve, reject) => {
+export const addImage = (cupId: string, path: string, predInsects: string[]) => new Promise((resolve, reject) => {
   const data = {
     timestamp: Date.now(),
     suchgangID: 'xyz',
     cupID: cupId,
     imagePath: path,
     determinedInsectID: null, //reviewed insect IDs
-    predictedInsectIDs: [],
+    predictedInsectIDs: predInsects,
   }
   globalDb.collection('image').insertOne(data, (err, result) => {
     if (err) reject(reject);
