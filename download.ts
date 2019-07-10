@@ -1,4 +1,4 @@
-const fs = require('fs');
+import * as fs from 'fs';
 import * as http from 'http';
 const options: http.RequestOptions = {
   timeout: 20000,
@@ -21,7 +21,10 @@ new Promise((resolve, reject) => {
     } else {
       const file = fs.createWriteStream(path);
       response.pipe(file);
-      file.on('finish', () => file.close(resolve));
+      file.on('finish', () => {
+        file.close()
+        resolve();
+      });
       file.on('error', reject);
     }
   }).on('error', reject).on('timeout', () => reject('TIMEOUT'));
@@ -67,7 +70,7 @@ const sync = async (cup: cupIP): Promise<string[]> => {
     let path = `images/${fileId}.jpg`;
   
     await download(url, path);
-    const pred = await ki.classify(path);
+    const pred = fs.statSync(path).size == 0? ['NO-IMAGE'] : await ki.classify(path);
     log.info('Determined insect = '+pred[0]);
     await addImage(cup._id, path, pred);
     await deleteStorage(cup.ip, index);
